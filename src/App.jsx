@@ -16,7 +16,7 @@ function App() {
           <SearchTask searchTask={searchTask} setSearchTask={setSearchTask}/>
           <Routes>
             {/* <Route path='/'  Component={<Home greeting="Welcome to Task Tracker" />} /> */}
-            <Route path='/'  element={<Home greeting="Welcome to Task Tracker" />} />
+            <Route path='/'  element={<Home greeting="Welcome to Task Tracker" searchTask={searchTask}/>} />
             <Route path='/addtask' Component={AddTask} />
             <Route path='/about' Component={About} />
           </Routes>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {FaTrashAlt} from 'react-icons/fa'
 import AddTask from '../components/AddTask'
 
-const Home = ({greeting}) => {
+const Home = ({greeting, searchTask}) => {
     const [name, setName] = useState('Ravinder')
     
     // const [tasks, setTasks] = useState([
@@ -28,7 +28,7 @@ const Home = ({greeting}) => {
     //     }
 
     // ])
-    const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('tasklist')))
+    const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('tasklist')) || [])
     const handleNameChange = () =>{
       const nameArr = ['Simran','Gurnur','Ravinder','Preet'];
       const intVal = Math.floor(Math.random()*4);
@@ -63,6 +63,8 @@ const Home = ({greeting}) => {
         //setTasks(updatedTasks);
         setAndSaveTask(updatedTasks);
     }
+
+    const filteredTask = tasks.filter((task) =>task.title.toLowerCase().includes(searchTask.toLowerCase()));
   return (
     <div className="w-full mx-auto px-4 py-6">
       <button onClick={handleNameChange} className="bg-blue-500 text-white px-4 py-2 rounded">Change Name</button>
@@ -71,9 +73,11 @@ const Home = ({greeting}) => {
       {/* <AddTask newTask={newTask} setNewTask={setNewTask} newReminder={newReminder} setNewReminder={setNewReminder} handleSubmit={handleSubmit} /> */}
       
       <AddTask addTask={addTask}/>
-      {tasks.length ? (
+      {/* {tasks.length ? ( */}
+      {filteredTask.length ? (
         <ul className="space-y-2 mt-10">
-            {tasks.map((task)=>(
+            {/* {tasks.map((task)=>( */}
+            {filteredTask.map((task)=>(
                 <li key={task.id} className="flex items-center justify-between p-3 bg-white border rounded-lg shadow-sm hover:shadow-md transition">
                     <div className="flex items-center gap-3">
                         <input type='checkbox' checked={task.reminder} className="w-5 h-5 accent-green-500 cursor-pointer" onChange={() =>handleChecked(task.id)}/>
