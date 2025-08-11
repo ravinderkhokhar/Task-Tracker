@@ -5,9 +5,10 @@ import About from './components/About'
 import Home from './components/Home';
 import Footer from './components/Footer';
 import SearchTask from './components/SearchTask';
-import { useState } from 'react'
+import { useState} from 'react'
 function App() {
   const [searchTask, setSearchTask] = useState('');
+
   return (
     <>
       <Router>

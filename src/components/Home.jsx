@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import {FaTrashAlt} from 'react-icons/fa'
 import AddTask from '../components/AddTask'
 
@@ -29,6 +29,9 @@ const Home = ({greeting, searchTask}) => {
 
     // ])
     const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('tasklist')) || [])
+    useEffect(()=>{
+        localStorage.setItem('tasklist',JSON.stringify(tasks));
+      },[tasks])
     const handleNameChange = () =>{
       const nameArr = ['Simran','Gurnur','Ravinder','Preet'];
       const intVal = Math.floor(Math.random()*4);
@@ -36,20 +39,20 @@ const Home = ({greeting, searchTask}) => {
       setName(nameArr[intVal]);
     }
 
-    const setAndSaveTask=(newtask)=>{
-        setTasks(newtask);
-        localStorage.setItem('tasklist',JSON.stringify(newtask));
-    }
+    // const setAndSaveTask=(newtask)=>{
+    //     setTasks(newtask);
+    //     localStorage.setItem('tasklist',JSON.stringify(newtask));
+    // }
     const handleChecked = (id) => {
         console.log(`Checked task : ${id}`)
         const updatedTasks = tasks.map((task)=>task.id === id ? {...task, reminder:!task.reminder}:task);
-        setAndSaveTask(updatedTasks);
+        setTasks(updatedTasks);
     }
 
     const handleDelete = (id) => {
         console.log(id);
         const updatedTasks = tasks.filter((task) => task.id !== id);
-        setAndSaveTask(updatedTasks);
+        setTasks(updatedTasks);
     }
 
     const addTask = (task,reminder) => {
@@ -61,7 +64,7 @@ const Home = ({greeting, searchTask}) => {
         const newAddedTasks = {id,reminder,title:task};
         const updatedTasks = [...tasks,newAddedTasks];
         //setTasks(updatedTasks);
-        setAndSaveTask(updatedTasks);
+        setTasks(updatedTasks);
     }
 
     const filteredTask = tasks.filter((task) =>task.title.toLowerCase().includes(searchTask.toLowerCase()));

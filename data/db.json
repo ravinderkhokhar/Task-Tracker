@@ -1,0 +1,8 @@
+{
+    "tasks":[
+        {"id":1,"reminder":true,"task":"React Learn"},
+        {"id":2,"reminder":false,"task":"Tailwind Learn"},
+        {"id":3,"reminder":true,"task":"Next Js Learn"},
+        {"id":4,"reminder":false,"task":"Node Js Learn"}
+    ]
+}
