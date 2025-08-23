@@ -1,61 +1,78 @@
 import { useState,useEffect } from 'react'
 import {FaTrashAlt} from 'react-icons/fa'
 import AddTask from '../components/AddTask'
-
-const Home = ({greeting, searchTask}) => {
+import apiRequest from './apiRequest'
+import SearchTask from './SearchTask';
+const Home = ({greeting, API_URL}) => {
     const [name, setName] = useState('Ravinder')
-    
-    // const [tasks, setTasks] = useState([
-    //     {
-    //         id:1,
-    //         reminder:true,
-    //         title:"React Learn"
-    //     },
-    //     {
-    //         id:2,
-    //         reminder:true,
-    //         title:"Tailwind Learn"
-    //     },
-    //     {
-    //         id:3,
-    //         reminder:false,
-    //         title:"Project Make"
-    //     },
-    //     {
-    //         id:4,
-    //         reminder:false,
-    //         title:"Upwork Profile Update"
-    //     }
+    const [searchTask, setSearchTask] = useState('');
+    const [isloading, setIsLoading]=useState(true);
+    const [fetchError, setFetchError] = useState(null);
+    // const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('tasklist')) || [])
+    // useEffect(()=>{
+    //     localStorage.setItem('tasklist',JSON.stringify(tasks));
+    // },[tasks])
 
-    // ])
-    const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('tasklist')) || [])
+    const [tasks, setTasks] = useState([])
     useEffect(()=>{
-        localStorage.setItem('tasklist',JSON.stringify(tasks));
-      },[tasks])
+        console.log(API_URL)
+        const fetchItems = async () =>{
+            try {
+                 const response = await fetch(API_URL);
+                 const listTasks = await response.json();
+                 console.log(listTasks);
+                 setTasks(listTasks);      
+            } catch(err) {
+                console.log(err.stack)
+            } finally{
+                setIsLoading(false);
+            }          
+        }
+        setTimeout(()=>{
+            (async () => await fetchItems())();
+        },2000)
+        
+    },[])
     const handleNameChange = () =>{
       const nameArr = ['Simran','Gurnur','Ravinder','Preet'];
       const intVal = Math.floor(Math.random()*4);
-      //console.log(nameArr[intVal]+"---"+nameArr+"---"+intVal)
       setName(nameArr[intVal]);
     }
-
-    // const setAndSaveTask=(newtask)=>{
-    //     setTasks(newtask);
-    //     localStorage.setItem('tasklist',JSON.stringify(newtask));
-    // }
-    const handleChecked = (id) => {
+    const handleChecked = async (id) => {
         console.log(`Checked task : ${id}`)
         const updatedTasks = tasks.map((task)=>task.id === id ? {...task, reminder:!task.reminder}:task);
         setTasks(updatedTasks);
+
+        const myTask = updatedTasks.filter(task => task.id === id);
+        const updateOptions ={
+            method: 'PATCH',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({reminder:myTask[0].reminder})
+        };
+
+        const reqUrl= `${API_URL}/${id}`;
+        console.log(reqUrl);
+        const result = await apiRequest(reqUrl,updateOptions);
+        if(result) setFetchError(result);
     }
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         console.log(id);
         const updatedTasks = tasks.filter((task) => task.id !== id);
         setTasks(updatedTasks);
+
+        const deleteOption ={
+            method: 'DELETE'
+        }
+
+        const reqUrl = `${API_URL}/${id}`;
+        const result = await apiRequest(reqUrl, deleteOption);
+        if(result) setFetchError(result);
     }
 
-    const addTask = (task,reminder) => {
+    const addTask = async (task,reminder) => {
         const taskLength = tasks.length-1;
         console.log("Total taskLength = "+taskLength);
         console.log("Submitted : "+task);
@@ -65,6 +82,17 @@ const Home = ({greeting, searchTask}) => {
         const updatedTasks = [...tasks,newAddedTasks];
         //setTasks(updatedTasks);
         setTasks(updatedTasks);
+
+        const postOptions = {
+            method:"POST",
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify(newAddedTasks)
+        }
+
+        const result = await apiRequest(API_URL,postOptions);
+        if(result) setFetchError(result);
     }
 
     const filteredTask = tasks.filter((task) =>task.title.toLowerCase().includes(searchTask.toLowerCase()));
@@ -74,10 +102,11 @@ const Home = ({greeting, searchTask}) => {
       <h2 className="text-2xl font-bold">Hello {name}, {greeting}</h2>
       <p className="text-gray-600">Manage your tasks efficiently.</p>
       {/* <AddTask newTask={newTask} setNewTask={setNewTask} newReminder={newReminder} setNewReminder={setNewReminder} handleSubmit={handleSubmit} /> */}
-      
+      <SearchTask searchTask={searchTask} setSearchTask={setSearchTask}/>
       <AddTask addTask={addTask}/>
       {/* {tasks.length ? ( */}
-      {filteredTask.length ? (
+      {isloading && <p>Loading Tasks...</p>}
+      {!isloading && filteredTask.length >0 && (
         <ul className="space-y-2 mt-10">
             {/* {tasks.map((task)=>( */}
             {filteredTask.map((task)=>(
@@ -93,7 +122,8 @@ const Home = ({greeting, searchTask}) => {
                 </li>
             ))}
         </ul>
-        ):'No Task Found'}
+        )}
+         {!isloading && filteredTask.length ===0 && <p>No Task Found</p>}
     </div>
   )
 }
